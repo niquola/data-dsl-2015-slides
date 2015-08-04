@@ -27,29 +27,41 @@ DNA & ribosomes
 ![](img/dna.jpg)
 
 
-## Homoiconicity
 
-Десятое правило Гринспена
+## Apps & Systems
+
+В сущности мы даем возможность пользователю (который зачастую не является программистом)
+программировать.
+
+![](img/user.jpg)
+
+## Code => Data
+
+Перетекание кода в данные как естественное
+развитие системы.
+
+```clj
+(+ 5 6)
+(+ x y)
+(op x y)
+
+```
+
+## Десятое правило Гринспена
 
 > Any sufficiently complicated C or Fortran program contains an ad hoc, informally-specified, bug-ridden, slow implementation of half of Lisp.
 
 Greenspun's tenth
 
-Like JS in JSON.
+## Homoiconicity
 
+The LISP optimum
 
-## Apps & Systems
+* self-extending
+* simple
+* dynamic
 
-Our apps essensialy just gives user
-ability to program CPU.
-
-![](user.jpg)
-
-## Declarativity
-
-Scale of decalrativity
-
-What or how?
+## Paradigm as a library
 
 ## DSL
 
@@ -58,9 +70,31 @@ Why?
 
 Common Language is not enought exact
 
+## Alan Kay
+
+
+
+## Declarativity & DRY
+
+Scale of decalrativity
+
+What or how?
+
 ## LISP
 
 Write DSLs and then write a programm!
+
+## DSL classification
+
+* external (bison, antlr, etc)
+* internal (macro, ast, etc)
+* data dsl
+
+## DSL internals
+
+* interpreter
+* compiler
+
 
 ## DSLs
 
@@ -82,7 +116,7 @@ http://www.lispcast.com/data-functions-macros-why
 
 ## Data DSLs
 
-html, css 
+html, css
 
 ## hiccup
 
