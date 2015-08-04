@@ -70,9 +70,12 @@ Why?
 
 Common Language is not enought exact
 
-## Alan Kay
+## Reinventing programming - Alan Kay
 
+![](img/tcpheader.png)
 
+> how small could be an understandable practical "Model T" design that covers this functionality?
+> 1M lines of code? 200K LOC? 100K LOC? 20K LOC?"
 
 ## Declarativity & DRY
 
@@ -109,34 +112,90 @@ Interpreters are much easier to write than compilers
 > But our restricted data model is powerful in exactly the way we need it (for our specific problem), but not generally powerful (as in Turing complete).
 > So we can design it to be analyzable.
 
+## Metadata
 
-Idea of data-driven programming
-
-http://www.lispcast.com/data-functions-macros-why
+Metadata is "data about data"
 
 ## Data DSLs
 
-html, css
+xml, html, css
+
+## Existing DSLs data representation
 
 ## hiccup
 
-[:body]
+```clj
+[:a {:href "http://github.com"} "GitHub"]
+
+(defn link-to [url txt] [:a {:href url} lbl])
+
+[:ul
+  (for [x xs]
+    (link-to x))]
+
+(html data)
+```
 
 ## honeysql (datalog)
 
+```clj
 {:select [:*]
  :from [:table]}
-
+```
 
 ## route-map
 
-{:GET 'welcome
-"posts" {:GET 'list
-         [:id] {:GET 'show}}}
+```clj
+(def routes
+  {:GET    'root
+   "files" {:path* {:GET 'file}}
+   "users" {:GET  'list
+            :POST 'create
+            [:uid] {:GET 'show
+                   :PUT 'udpate
+                   :DELETE 'destroy}}})
+
+(route-map/match [:get "/unexisting"] routes) ;;=> nil
+(route-map/match [:get "/users/1"] routes)
+;;=> {:match 'show
+;;    :parents [all nodes in path to match]
+;;    :params {:uid "1"}}
+
+(route-map/match [:get "/files/assets/img/icon.png"] routes)
+;;=> {:match 'file
+;;    :params {:path* ["assets" "img" "icon.png"]}
+;;    :parents ...}
+```
 
 ## schema
 
-{:key (maby (enum :a :b :c))}
+```clj
+(def Schema
+  {:a {:b s/Str
+       :c s/Int}
+   :d [{:e s/Keyword
+        :f [s/Num]}]
+   (s/maybe :g) s/Str})
+
+(s/validate Schema data)
+(s/check Schema data)
+```
+
+## graph
+
+```clj
+(def stats-graph
+  "A graph specifying the same computation as 'stats'"
+  {:n  (fnk [xs]   (count xs))
+   :m  (fnk [xs n] (/ (sum identity xs) n))
+   :m2 (fnk [xs n] (/ (sum #(* % %) xs) n))
+   :v  (fnk [m m2] (- m2 (* m m)))})
+(def stats-eager (graph/compile stats-graph))
+(def lazy-stats (graph/lazy-compile stats-graph))
+
+(stats-eager {:xs [1 2 3 6]})
+(lazy-stats {:xs [1 2 3 6]})
+```
 
 ## validation framework ???
 
