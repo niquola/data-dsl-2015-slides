@@ -380,39 +380,38 @@ myfn(3,6)            | (myfn 3 6)
 
   <section data-markdown>
   <script type="text/template">
-### clojure
+### cloc src/
 ```
-    Language        files             code
-    --------------------------------------
-    CLOJURE
-    --------------------------------------
-    Java              167            39K
-    Clojure            43            16K
-    -------------------------------------
-    SUM:              216            55K
-    
-    SCALA
-    -------------------------------------
-    Scala             1282         147K
-    Java                88           9K
-    -------------------------------------
-    SUM:              1401         163K
-
-    Language                     files          blank        comment           code
-    -------------------------------------------------------------------------------
-    Java                          1020          22858          61539         121K
-    Groovy                        1335          19219          34900         101K
-    -------------------------------------------------------------------------------
-    SUM:                          2420          42962          96916         227K
-
-
+Language   files           code
+-----------------------------
+Java:        167          39K
+Clojure:      43          16K
+SUM:        216           55K
+-----------------------------
+Scala:       1282        147K
+Java:          88          9K
+SUM:        1401         163K
+-----------------------------
+Java:       1020         121K
+Groovy:     1335         101K
+SUM:       2420         227K
+-----------------------------
+JRUBY:
+Java:      1385         214K
+yacc:         3           4K
+SUM:       1454         223K
+---------------------------
+KOTLIN
+Java:      1697       187K
+SUM:      1863        195K
+---------------------------
 ```
   </script>
 </section>
 
   <section data-markdown>
   <script type="text/template">
-### route-map
+### route-map (sloc 42)
 ```
 (to-path "GET user/1/new")
     => ["users" 1 "new" :get]
@@ -475,42 +474,190 @@ myfn(3,6)            | (myfn 3 6)
 ### route-map: interop
 ```
 (to-json routes)
-;; send to client side
-(to-swagger routes)
+;; send to client side (js)
 ;; send to rest clients
 ```
   </script>
 </section>
 
+  <section data-markdown>
+  <script type="text/template">
+### Prismatic Schema (sloc 321)
+```clojure
+(def Schema
+  {:a {:b s/Str
+       :c s/Int}
+   :d [{:e s/Keyword
+        :f [s/Num]}]
+   (s/maybe :g) s/Str})
 
-    <section>
-      <h3>hiccup</h3>
-    </section>
+(s/validate Schema data)
+(s/check Schema data)
 
-    <section>
-      <h3>honeysql</h3>
-    </section>
+;; Exception -- Value does not match schema:
+;;  {:a {:b (not (instance? java.lang.String 123)),
+;;       :c (not (integer? "ABC"))},
+;;   :d missing-required-key}
 
-    <section>
-      <h3>datalog</h3>
-    </section>
+(coerce/coercer Schema json-coercion-matcher)
+```
+  </script>
+</section>
 
-    <section>
-      <h3>Schema</h3>
-    </section>
+  <section data-markdown>
+  <script type="text/template">
+### Mix it
+```clojure
+{"entity"
+  {:POST
+       {:handler `handler
+        :doc     "bla, bla"
+        :body    EntitySchema
+        :params  ParamsSchema}}}
 
-    <section>
-      <h3>Plumbing</h3>
-    </section>
+(to-swagger routes)
+
+;; routing
+;; validation
+;; coercing
+;; meta-data
+```
+  </script>
+</section>
+
+  <section data-markdown>
+  <script type="text/template">
+### hiccup (sloc 509)
+```clojure
+[:tag {:attr "value"} "content"]
+
+(defn link-to [url txt]
+   [:a {:href url} lbl])
+
+(def layout [content]
+  [:html [:head ...] [:body content]])
+
+(layout
+ [:ul
+   (for [x xs]
+     (link-to x))])
+
+(html data)
+```
+  </script>
+</section>
+
+  <section data-markdown>
+  <script type="text/template">
+### honeysql (sloc 701)
+```clojure
+{:select [:f.*]
+ :from [[:foo :f] [:baz :b]]
+ :join [:draq [:= :f.b :draq.x]]
+ :where [:or
+          [:and [:= :f.a "bort"]
+                [:not= :b.baz "var"]]
+          [:between :f.e 10 20]]
+ :group-by [:f.a]
+ :having [:< 0 :f.e]
+ :limit 50}
+
+(sql/format data) => ["select ? ..." args]
+```
+  </script>
+</section>
+
+  <section data-markdown>
+  <script type="text/template">
+### honeysql (sloc 701)
+```clojure
+;; sugar dsls
+(-> (select :a :b :c)
+    (from :foo)
+    (where [:= :f.a "baz"]))
+
+;; composition
+(-> sqlmap
+    (merge-select :d :e)
+    (merge-where [:> :b 10]))
+
+;; extension
+{:select [:*]
+ :from   [:users]
+ :with   [:roles]}
+;;=> {:name "user" :roles [{:name "admin"}]}
+```
+  </script>
+</section>
+
+
+<section data-markdown>
+<script type="text/template">
+### datalog/datascript
+```clojure
+;; query
+[:find ?release-name
+ :in $ ?artist-name
+ :where [?artist :artist/name ?artist-name]
+        [?release :release/artists ?artist]
+        [?release :release/name ?release-name]]
+```
+  </script>
+</section>
+
+<section data-markdown>
+<script type="text/template">
+### Plumbing graph
+```clojure
+(def stats-graph
+  {:n  (fnk [xs]   (count xs))
+   :m  (fnk [xs n] (/ (sum identity xs) n))
+   :m2 (fnk [xs n] (/ (sum #(* % %) xs) n))
+   :v  (fnk [m m2] (- m2 (* m m)))})
+
+(def stats-eager (graph/compile stats-graph))
+(def lazy-stats (graph/lazy-compile stats-graph))
+
+(stats-eager {:xs [1 2 3 6]})
+(lazy-stats {:xs [1 2 3 6]})
+```
+  </script>
+</section>
 
     <section>
       <h3>Reciepe</h3>
+      <ul>
+        <li>data format</li>
+        <li>interpreter</li>
+        <li>sugar</li>
+        <li>[compiler]</li>
+      </ul>
+    </section>
+
+    <section>
+      <h3>Data DSL</h3>
+      <ul>
+        <li>simple</li>
+        <li>interoperable</li>
+        <li>dynamic</li>
+        <li>re-interpretable</li>
+        <li>extendable</li>
+      </ul>
     </section>
 
     <section>
       <h3>Code & Data</h3>
     </section>
 
+    <section>
+      <h3>Write <strong>code</strong> for interpreter</h3>
+      <hr/>
+      <h3>Write <strong>interpreter</strong> for data</h3>
+    </section>
+
+    <section>
+      <h3>Write your <strong>lang</strong>!</h3>
+    </section>
 
     <section>
       <h3>Thx</h3>
@@ -548,6 +695,5 @@ dependencies: [
 
 </script>
 
-<script src="https://raw.githubusercontent.com/isagalaev/highlight.js/master/src/languages/clojure.js">
 </body>
 </html>
